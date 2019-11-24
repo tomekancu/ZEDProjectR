@@ -1882,7 +1882,7 @@ dim(train)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Print error matrix</p>
+<p>Print confusion matrix</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY20gPSB0YWJsZSh0ZXN0WywxXSwgcHJlZClcbmNtXG5gYGAifQ== -->
@@ -1897,9 +1897,45 @@ cm</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>Draw confusion matrix</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZm91cmZvbGRwbG90KGNtLCBjb2xvciA9IGMoXCIjQ0M2NjY2XCIsIFwiIzk5Q0M5OVwiKSxcbiAgICAgICAgICAgICBjb25mLmxldmVsID0gMCwgbWFyZ2luID0gMSwgbWFpbiA9IFwiQ29uZnVzaW9uIE1hdHJpeFwiKVxuYGBgIn0= -->
+<pre class="r"><code>fourfoldplot(cm, color = c(&quot;#CC6666&quot;, &quot;#99CC99&quot;),
+             conf.level = 0, margin = 1, main = &quot;Confusion Matrix&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Accuracy</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWNjdXJhY3kgPSAoY21bMiwyXSArIGNtWzEsMV0pIC8gc3VtKGNtKVxuYWNjdXJhY3lcbmBgYCJ9 -->
+<pre class="r"><code>accuracy = (cm[2,2] + cm[1,1]) / sum(cm)
+accuracy</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Precision</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJlY2lzaW9uID0gY21bMiwyXSAvIChjbVsyLDJdICsgY21bMSwyXSlcbnByZWNpc2lvblxuYGBgIn0= -->
+<pre class="r"><code>precision = cm[2,2] / (cm[2,2] + cm[1,2])
+precision</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Recall</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmVjYWxsID0gY21bMiwyXSAvIChjbVsyLDJdICsgY21bMiwxXSlcbnJlY2FsbFxuYGBgIn0= -->
+<pre class="r"><code>recall = cm[2,2] / (cm[2,2] + cm[2,1])
+recall</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlpFRCBQcm9qZWN0Ig0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KDQpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ3RybCtTaGlmdCtFbnRlciouIA0KDQoNCkxvYWQgZGF0YQ0KYGBge3J9DQpkYXRhID0gcmVhZC50YWJsZSgnZGF0YS9icmVhc3QtY2FuY2VyLmRhdGEnLCBzZXA9JywnLCBoZWFkZXIgPSBGLCBjb2wubmFtZXMgPSBjKCdDbGFzcycsICdhZ2UnLCAnbWVub3BhdXNlJywgJ3R1bW9yLXNpemUnLCAnaW52LW5vZGVzJywgJ25vZGUtY2FwcycsICdkZWctbWFsaWcnLCAnYnJlYXN0JywgJ2JyZWFzdC1xdWFkJyAsJ2lycmFkaWF0JykpDQoNCmBgYA0KDQoNCkxvYWQgbGlicmFyaWVzDQpgYGB7cn0NCmxpYnJhcnkocmFuZG9tRm9yZXN0KQ0KcmVxdWlyZShjYVRvb2xzKQ0KYGBgDQoNCg0KQ2hlY2sgZGF0YSBzdW1tYXJ5DQpgYGB7cn0NCnN1bW1hcnkoZGF0YSkNCmBgYA0KQ2hlY2sgZGF0YSBkaW1lbnNpb25zDQpgYGB7cn0NCmRpbShkYXRhKQ0KYGBgDQpDaGVjayBkYXRhIE5BIHZhbHVlcw0KYGBge3J9DQpjb2xTdW1zKGlzLm5hKGRhdGEpKQ0KYGBgDQpDaGVjayBkYXRhIGNvbHVtbiBjbGFzc2VzDQpgYGB7cn0NCnNhcHBseShkYXRhLCBjbGFzcykNCmBgYA0KDQpMb2FkIGxpYnJhcmllcw0KYGBge3J9DQpsaWJyYXJ5KHJhbmRvbUZvcmVzdCkNCnJlcXVpcmUoY2FUb29scykNCmBgYA0KDQpTcGxpdCBkYXRhIGludG8gdHJhaW4gYW5kIHRlc3Qgc3Vic2V0cw0KYGBge3J9DQpzYW1wbGUgPSBzYW1wbGUuc3BsaXQoZGF0YSRDbGFzcyAgICwgU3BsaXRSYXRpbyA9IC43NSkNCnRyYWluID0gc3Vic2V0KGRhdGEsIHNhbXBsZSA9PSBUUlVFKQ0KdGVzdCAgPSBzdWJzZXQoZGF0YSwgc2FtcGxlID09IEZBTFNFKQ0KZGltKHRyYWluKQ0KZGltKHRlc3QpDQpgYGANCg0KDQpTcGxpdCBkYXRhIGludG8gdHJhaW4gYW5kIHRlc3Qgc3Vic2V0cw0KYGBge3J9DQpyZiA8LSByYW5kb21Gb3Jlc3QoDQogIENsYXNzIH4gLiwNCiAgZGF0YT10cmFpbg0KKQ0KYGBgDQoNCg0KQXBwbHkgbW9kZWwgdG8gdGVzdCBzZXQNCmBgYHtyfQ0KcHJlZCA9IHByZWRpY3QocmYsIG5ld2RhdGE9dGVzdFstMV0pDQpgYGANCg0KUHJpbnQgZXJyb3IgbWF0cml4DQpgYGB7cn0NCmNtID0gdGFibGUodGVzdFssMV0sIHByZWQpDQpjbQ0KYGBgDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0K</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlpFRCBQcm9qZWN0Ig0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KDQpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ3RybCtTaGlmdCtFbnRlciouIA0KDQoNCkxvYWQgZGF0YQ0KYGBge3J9DQpkYXRhID0gcmVhZC50YWJsZSgnZGF0YS9icmVhc3QtY2FuY2VyLmRhdGEnLCBzZXA9JywnLCBoZWFkZXIgPSBGLCBjb2wubmFtZXMgPSBjKCdDbGFzcycsICdhZ2UnLCAnbWVub3BhdXNlJywgJ3R1bW9yLXNpemUnLCAnaW52LW5vZGVzJywgJ25vZGUtY2FwcycsICdkZWctbWFsaWcnLCAnYnJlYXN0JywgJ2JyZWFzdC1xdWFkJyAsJ2lycmFkaWF0JykpDQoNCmBgYA0KDQoNCkxvYWQgbGlicmFyaWVzDQpgYGB7cn0NCmxpYnJhcnkocmFuZG9tRm9yZXN0KQ0KcmVxdWlyZShjYVRvb2xzKQ0KYGBgDQoNCg0KQ2hlY2sgZGF0YSBzdW1tYXJ5DQpgYGB7cn0NCnN1bW1hcnkoZGF0YSkNCmBgYA0KQ2hlY2sgZGF0YSBkaW1lbnNpb25zDQpgYGB7cn0NCmRpbShkYXRhKQ0KYGBgDQpDaGVjayBkYXRhIE5BIHZhbHVlcw0KYGBge3J9DQpjb2xTdW1zKGlzLm5hKGRhdGEpKQ0KYGBgDQpDaGVjayBkYXRhIGNvbHVtbiBjbGFzc2VzDQpgYGB7cn0NCnNhcHBseShkYXRhLCBjbGFzcykNCmBgYA0KDQpMb2FkIGxpYnJhcmllcw0KYGBge3J9DQpsaWJyYXJ5KHJhbmRvbUZvcmVzdCkNCnJlcXVpcmUoY2FUb29scykNCmBgYA0KDQpTcGxpdCBkYXRhIGludG8gdHJhaW4gYW5kIHRlc3Qgc3Vic2V0cw0KYGBge3J9DQpzYW1wbGUgPSBzYW1wbGUuc3BsaXQoZGF0YSRDbGFzcyAgICwgU3BsaXRSYXRpbyA9IC43NSkNCnRyYWluID0gc3Vic2V0KGRhdGEsIHNhbXBsZSA9PSBUUlVFKQ0KdGVzdCAgPSBzdWJzZXQoZGF0YSwgc2FtcGxlID09IEZBTFNFKQ0KZGltKHRyYWluKQ0KZGltKHRlc3QpDQpgYGANCg0KDQpTcGxpdCBkYXRhIGludG8gdHJhaW4gYW5kIHRlc3Qgc3Vic2V0cw0KYGBge3J9DQpyZiA8LSByYW5kb21Gb3Jlc3QoDQogIENsYXNzIH4gLiwNCiAgZGF0YT10cmFpbg0KKQ0KYGBgDQoNCg0KQXBwbHkgbW9kZWwgdG8gdGVzdCBzZXQNCmBgYHtyfQ0KcHJlZCA9IHByZWRpY3QocmYsIG5ld2RhdGE9dGVzdFstMV0pDQpgYGANCg0KUHJpbnQgY29uZnVzaW9uIG1hdHJpeA0KYGBge3J9DQpjbSA9IHRhYmxlKHRlc3RbLDFdLCBwcmVkKQ0KY20NCmBgYA0KDQpEcmF3IGNvbmZ1c2lvbiBtYXRyaXgNCmBgYHtyfQ0KZm91cmZvbGRwbG90KGNtLCBjb2xvciA9IGMoIiNDQzY2NjYiLCAiIzk5Q0M5OSIpLA0KICAgICAgICAgICAgIGNvbmYubGV2ZWwgPSAwLCBtYXJnaW4gPSAxLCBtYWluID0gIkNvbmZ1c2lvbiBNYXRyaXgiKQ0KYGBgDQoNCkFjY3VyYWN5DQpgYGB7cn0NCmFjY3VyYWN5ID0gKGNtWzIsMl0gKyBjbVsxLDFdKSAvIHN1bShjbSkNCmFjY3VyYWN5DQpgYGANCg0KUHJlY2lzaW9uDQpgYGB7cn0NCnByZWNpc2lvbiA9IGNtWzIsMl0gLyAoY21bMiwyXSArIGNtWzEsMl0pDQpwcmVjaXNpb24NCmBgYA0KDQpSZWNhbGwNCmBgYHtyfQ0KcmVjYWxsID0gY21bMiwyXSAvIChjbVsyLDJdICsgY21bMiwxXSkNCnJlY2FsbA0KYGBgDQoNCg0KDQoNCg0K</div>
 
 
 

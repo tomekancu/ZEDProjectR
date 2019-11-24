@@ -68,20 +68,35 @@ Apply model to test set
 pred = predict(rf, newdata=test[-1])
 ```
 
-Print error matrix
+Print confusion matrix
 ```{r}
 cm = table(test[,1], pred)
 cm
 ```
 
+Draw confusion matrix
+```{r}
+fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, main = "Confusion Matrix")
+```
 
+Accuracy
+```{r}
+accuracy = (cm[2,2] + cm[1,1]) / sum(cm)
+accuracy
+```
 
+Precision
+```{r}
+precision = cm[2,2] / (cm[2,2] + cm[1,2])
+precision
+```
 
-
-
-
-
-
+Recall
+```{r}
+recall = cm[2,2] / (cm[2,2] + cm[2,1])
+recall
+```
 
 
 

@@ -11,7 +11,7 @@ for(tumor_size_cat in levels(data$tumor.size)){
 }
 data <- subset(data, select = -c(tumor.size))
 
-install.packages("caTools")
+install.packages("ggplot2")
 library(randomForest)
 require(caTools)
 
@@ -36,7 +36,18 @@ rf <- randomForest(
   data=train
 )
 
-pred = predict(rf, newdata=test[-14])
+pred = predict(rf, newdata=test[-1])
 
 cm = table(test[,1], pred)
 cm
+
+fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, main = "Confusion Matrix")
+
+accuracy = (cm[2,2] + cm[1,1]) / sum(cm)
+precision = cm[2,2] / (cm[2,2] + cm[1,2])
+recall = cm[2,2] / (cm[2,2] + cm[2,1])
+
+cor_matrix<-cor(data)
+head(round(cor_matrix,2))
+
