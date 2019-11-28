@@ -11,7 +11,7 @@ for(tumor_size_cat in levels(data$tumor.size)){
 }
 data <- subset(data, select = -c(tumor.size))
 
-install.packages("ggplot2")
+install.packages("groupdata2")
 library(randomForest)
 require(caTools)
 
@@ -25,7 +25,14 @@ dim(data)
 sapply(data, class)
 colSums(is.na(data))
 
-sample = sample.split(data$Class   , SplitRatio = .75)
+library(dplyr)
+library(tidyr)
+data = as.data.frame(data) %>% 
+  separate(age, into = paste("age", c('begin', 'end'), sep = ".")) %>%
+  separate(tumor.size, into = paste("tumor.size", c('begin', 'end'), sep = ".")) %>%
+  separate(inv.nodes, into = paste("inv.nodes", c('begin', 'end'), sep = "."))
+
+sample = sample.split(data$Class, SplitRatio = .75)
 train = subset(data, sample == TRUE)
 test  = subset(data, sample == FALSE)
 dim(train)
@@ -51,3 +58,9 @@ recall = cm[2,2] / (cm[2,2] + cm[2,1])
 cor_matrix<-cor(data)
 head(round(cor_matrix,2))
 
+
+https://sebastiansauer.github.io/ordering-bars/
+
+barplot(prop.table(table(data$deg.malig)))
+
+head(data)

@@ -6,6 +6,7 @@ output:
     vertical_layout: fill
 ---
 
+
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(randomForest)
@@ -27,7 +28,7 @@ fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+### Confusion Matrix
 
 ```{r}
 fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
@@ -37,17 +38,15 @@ fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### Age distribution
 
 ```{r}
-fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, main = "Confusion Matrix")
+barplot(prop.table(table(data$age)))
 ```
 
-### Chart C
+### Degree of malignancy distribution
 
 ```{r}
-fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, main = "Confusion Matrix")
+barplot(prop.table(table(data$deg.malig)))
 ```
 
