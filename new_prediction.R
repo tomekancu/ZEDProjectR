@@ -12,20 +12,33 @@ data = as.data.frame(data) %>%
 head(data)
 summary(data)
 
+sizeOfClass <-  round(count(filter(data, Class=='recurrence-events')) * 0.7)[1, 'n']
 
-set.seed(23)
-inTraining <- 
-  createDataPartition(
+inTraining <- 1:sizeOfClass
+
+recTrain <- filter(data, Class=='recurrence-events')[inTraining, ]
+recTest <- filter(data, Class=='recurrence-events')[-inTraining, ]
+
+noRecTrain <- filter(data, Class=='no-recurrence-events')[inTraining, ]
+noRecTest <- filter(data, Class=='no-recurrence-events')[-inTraining, ]
+
+training <- rbind(recTrain, noRecTrain)
+testing <- rbind(recTest, noRecTest)
+
+
+# set.seed(23)
+#inTraining <- 
+#   createDataPartition(
     # attribute stratification
-    y = data$Class,
+#    y = data$Class,
     # seperating class labels
-    p = .75,
+#    p = .75,
     # using hold out scheme
-    list = FALSE)
+#    list = FALSE)
 
-training <- data[ inTraining,]
-testing  <- data[-inTraining,]
-training = upsample(training, cat_col="Class")
+#training <- data[ inTraining,]
+#testing  <- data[-inTraining,]
+#training = upsample(training, cat_col="Class")
 
 summary(training$Class)
 summary(testing$Class)
