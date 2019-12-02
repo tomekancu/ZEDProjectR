@@ -9,6 +9,17 @@ data = as.data.frame(data) %>%
   separate(age, into = paste("age", c('begin', 'end'), sep = ".")) %>%
   separate(tumor.size, into = paste("tumor.size", c('begin', 'end'), sep = ".")) %>%
   separate(inv.nodes, into = paste("inv.nodes", c('begin', 'end'), sep = "."))
+
+levels(data$node.caps) <- c("any", "no", "yes")
+data$age.begin <- as.numeric(data$age.begin)
+data$age.end <- as.numeric(data$age.end)
+
+data$tumor.size.begin <- as.numeric(data$tumor.size.begin)
+data$tumor.size.end <- as.numeric(data$tumor.size.end)
+
+data$inv.nodes.begin <- as.numeric(data$inv.nodes.begin)
+data$inv.nodes.end <- as.numeric(data$inv.nodes.end)
+
 head(data)
 summary(data)
 
