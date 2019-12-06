@@ -369,8 +369,8 @@ summary {
 </div>
 
 
-<div id="init" class="section level1">
-<h1>Init</h1>
+<div id="init-libs" class="section level1">
+<h1>Init libs</h1>
 <pre class="r"><code>library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
@@ -380,6 +380,11 @@ summary {
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(tidyr)
+library(mlbench)
+library(caret)</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
 </div>
 <div id="data" class="section level1">
 <h1>Data</h1>
@@ -396,25 +401,162 @@ summary {
 <li>breast-quad: left-up, left-low, right-up, right-low, central.</li>
 <li>irradiat: yes, no.</li>
 </ol>
-<pre class="r"><code>data &lt;- read.csv(&#39;data/breast-cancer.data&#39;, sep=&quot;,&quot;, header=F)
-colnames(data) &lt;- c(&quot;Class&quot;, &quot;age&quot;, &quot;menopause&quot;, &quot;tumorSize&quot;, &quot;invNodes&quot;, 
-                    &quot;nodeCaps&quot;, &quot;degMalig&quot;, &quot;breast&quot;, &quot;breastQuad&quot;, &quot;irradiat&quot;)
+</div>
+<div id="load-data" class="section level1">
+<h1>Load data</h1>
+<pre class="r"><code>data &lt;- read.table(&#39;data/breast-cancer.data&#39;, sep = &#39;,&#39;, header = F,
+                   col.names = c(&#39;Class&#39;, &#39;age&#39;, &#39;menopause&#39;, &#39;tumor-size&#39;,
+                                 &#39;inv-nodes&#39;, &#39;node-caps&#39;, &#39;deg-malig&#39;, &#39;breast&#39;,
+                                 &#39;breast-quad&#39;, &#39;irradiat&#39;))
+data &lt;- as.data.frame(data) %&gt;%
+  separate(age, into = paste(&quot;age&quot;, c(&#39;begin&#39;, &#39;end&#39;), sep = &quot;.&quot;)) %&gt;%
+  separate(tumor.size, into = paste(&quot;tumor.size&quot;, c(&#39;begin&#39;, &#39;end&#39;), sep = &quot;.&quot;)) %&gt;%
+  separate(inv.nodes, into = paste(&quot;inv.nodes&quot;, c(&#39;begin&#39;, &#39;end&#39;), sep = &quot;.&quot;))
 
-head(data)</code></pre>
-<pre><code>##                  Class   age menopause tumorSize invNodes nodeCaps
-## 1 no-recurrence-events 30-39   premeno     30-34      0-2       no
-## 2 no-recurrence-events 40-49   premeno     20-24      0-2       no
-## 3 no-recurrence-events 40-49   premeno     20-24      0-2       no
-## 4 no-recurrence-events 60-69      ge40     15-19      0-2       no
-## 5 no-recurrence-events 40-49   premeno       0-4      0-2       no
-## 6 no-recurrence-events 60-69      ge40     15-19      0-2       no
-##   degMalig breast breastQuad irradiat
-## 1        3   left   left_low       no
-## 2        2  right   right_up       no
-## 3        2   left   left_low       no
-## 4        2  right    left_up       no
-## 5        2  right  right_low       no
-## 6        2   left   left_low       no</code></pre>
+levels(data$Class) &lt;- c(&quot;no.recurrence.events&quot;, &quot;recurrence.events&quot;)
+levels(data$node.caps) &lt;- c(&quot;any&quot;, &quot;no&quot;, &quot;yes&quot;)
+levels(data$breast.quad) &lt;- c(&quot;any&quot;, &quot;central&quot;, &quot;left.low&quot;, &quot;left.up&quot;, &quot;right.low&quot;, &quot;right.up&quot;)
+
+data$age.begin &lt;- as.numeric(data$age.begin)
+data$age.end &lt;- as.numeric(data$age.end)
+
+data$tumor.size.begin &lt;- as.numeric(data$tumor.size.begin)
+data$tumor.size.end &lt;- as.numeric(data$tumor.size.end)
+
+data$inv.nodes.begin &lt;- as.numeric(data$inv.nodes.begin)
+data$inv.nodes.end &lt;- as.numeric(data$inv.nodes.end)</code></pre>
+<p>Head</p>
+<pre class="r"><code>head(data)</code></pre>
+<pre><code>##                  Class age.begin age.end menopause tumor.size.begin
+## 1 no.recurrence.events        30      39   premeno               30
+## 2 no.recurrence.events        40      49   premeno               20
+## 3 no.recurrence.events        40      49   premeno               20
+## 4 no.recurrence.events        60      69      ge40               15
+## 5 no.recurrence.events        40      49   premeno                0
+## 6 no.recurrence.events        60      69      ge40               15
+##   tumor.size.end inv.nodes.begin inv.nodes.end node.caps deg.malig breast
+## 1             34               0             2        no         3   left
+## 2             24               0             2        no         2  right
+## 3             24               0             2        no         2   left
+## 4             19               0             2        no         2  right
+## 5              4               0             2        no         2  right
+## 6             19               0             2        no         2   left
+##   breast.quad irradiat
+## 1    left.low       no
+## 2    right.up       no
+## 3    left.low       no
+## 4     left.up       no
+## 5   right.low       no
+## 6    left.low       no</code></pre>
+<p>Summary</p>
+<pre class="r"><code>summary(data)</code></pre>
+<pre><code>##                   Class       age.begin        age.end        menopause  
+##  no.recurrence.events:201   Min.   :20.00   Min.   :29.00   ge40   :129  
+##  recurrence.events   : 85   1st Qu.:40.00   1st Qu.:49.00   lt40   :  7  
+##                             Median :50.00   Median :59.00   premeno:150  
+##                             Mean   :46.64   Mean   :55.64                
+##                             3rd Qu.:50.00   3rd Qu.:59.00                
+##                             Max.   :70.00   Max.   :79.00                
+##  tumor.size.begin tumor.size.end  inv.nodes.begin  inv.nodes.end   
+##  Min.   : 0.00    Min.   : 4.00   Min.   : 0.000   Min.   : 2.000  
+##  1st Qu.:20.00    1st Qu.:24.00   1st Qu.: 0.000   1st Qu.: 2.000  
+##  Median :25.00    Median :29.00   Median : 0.000   Median : 2.000  
+##  Mean   :24.41    Mean   :28.41   Mean   : 1.573   Mean   : 3.573  
+##  3rd Qu.:30.00    3rd Qu.:34.00   3rd Qu.: 3.000   3rd Qu.: 5.000  
+##  Max.   :50.00    Max.   :54.00   Max.   :24.000   Max.   :26.000  
+##  node.caps   deg.malig       breast       breast.quad  irradiat 
+##  any:  8   Min.   :1.000   left :152   any      :  1   no :218  
+##  no :222   1st Qu.:2.000   right:134   central  : 21   yes: 68  
+##  yes: 56   Median :2.000               left.low :110            
+##            Mean   :2.049               left.up  : 97            
+##            3rd Qu.:3.000               right.low: 24            
+##            Max.   :3.000               right.up : 33</code></pre>
+</div>
+<div id="make-test-and-train-sets" class="section level1">
+<h1>Make test and train sets</h1>
+<pre class="r"><code>sizeOfClass &lt;- round(nrow(filter(data, Class == &#39;recurrence.events&#39;)) * 0.7)
+
+inTraining &lt;- 1:sizeOfClass
+
+recTrain &lt;- filter(data, Class == &#39;recurrence.events&#39;)[inTraining,]
+recTest &lt;- filter(data, Class == &#39;recurrence.events&#39;)[-inTraining,]
+
+noRecTrain &lt;- filter(data, Class == &#39;no.recurrence.events&#39;)[inTraining,]
+noRecTest &lt;- filter(data, Class == &#39;no.recurrence.events&#39;)[-inTraining,]
+
+training &lt;- rbind(recTrain, noRecTrain)
+testing &lt;- rbind(recTest, noRecTest)</code></pre>
+</div>
+<div id="classification" class="section level1">
+<h1>Classification</h1>
+<pre class="r"><code>ctrl &lt;- trainControl(method = &quot;repeatedcv&quot;,
+                     number = 5,
+                     repeats = 5,
+                     summaryFunction = twoClassSummary,
+                     classProbs = TRUE,
+                     search = &#39;random&#39;,
+                     allowParallel = TRUE)
+
+rfGrid &lt;- expand.grid(mtry = 1:5, ntree = c(10, 100, 1000))
+
+set.seed(23)
+fitTune &lt;- train(Class ~ .,
+                 data = training,
+                 method = &quot;rf&quot;,
+                 metric = &quot;Recall&quot;,
+                 preProc = c(&quot;center&quot;, &quot;scale&quot;),
+                 trControl = ctrl,
+                 ntree = 1000)</code></pre>
+<pre><code>## Warning in train.default(x, y, weights = w, ...): The metric &quot;Recall&quot; was
+## not in the result set. ROC will be used instead.</code></pre>
+<pre class="r"><code>fitTune</code></pre>
+<pre><code>## Random Forest 
+## 
+## 118 samples
+##  12 predictor
+##   2 classes: &#39;no.recurrence.events&#39;, &#39;recurrence.events&#39; 
+## 
+## Pre-processing: centered (18), scaled (18) 
+## Resampling: Cross-Validated (5 fold, repeated 5 times) 
+## Summary of sample sizes: 94, 96, 94, 94, 94, 94, ... 
+## Resampling results across tuning parameters:
+## 
+##   mtry  ROC        Sens       Spec     
+##    7    0.7398290  0.6996970  0.6227273
+##    8    0.7370558  0.6860606  0.6227273
+##   11    0.7337477  0.6724242  0.6227273
+## 
+## ROC was used to select the optimal model using the largest value.
+## The final value used for the model was mtry = 7.</code></pre>
+<pre class="r"><code>rfClasses2 &lt;- predict(fitTune, newdata = testing)
+confusionMatrix(data = rfClasses2, testing$Class)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##                       Reference
+## Prediction             no.recurrence.events recurrence.events
+##   no.recurrence.events                   63                 5
+##   recurrence.events                      79                21
+##                                               
+##                Accuracy : 0.5                 
+##                  95% CI : (0.422, 0.578)      
+##     No Information Rate : 0.8452              
+##     P-Value [Acc &gt; NIR] : 1                   
+##                                               
+##                   Kappa : 0.1162              
+##                                               
+##  Mcnemar&#39;s Test P-Value : 1.653e-15           
+##                                               
+##             Sensitivity : 0.4437              
+##             Specificity : 0.8077              
+##          Pos Pred Value : 0.9265              
+##          Neg Pred Value : 0.2100              
+##              Prevalence : 0.8452              
+##          Detection Rate : 0.3750              
+##    Detection Prevalence : 0.4048              
+##       Balanced Accuracy : 0.6257              
+##                                               
+##        &#39;Positive&#39; Class : no.recurrence.events
+## </code></pre>
 </div>
 
 

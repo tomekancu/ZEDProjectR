@@ -1,40 +1,9 @@
----
-title: "Projekt R"
-author: "Tomasz Ancukiewicz 127219, Mikołaj Leśny XXXXXX"
-date: "18.11.2019"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-# Init libs
-```{r}
+# Load libs
 library(dplyr)
 library(tidyr)
 library(mlbench)
 library(caret)
-```
-
-# Data
-Attribute Information:
-
- 1. Class: no-recurrence-events, recurrence-events
- 2. age: 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80-89, 90-99.
- 3. menopause: lt40, ge40, premeno.
- 4. tumor-size: 0-4, 5-9, 10-14, 15-19, 20-24, 25-29, 30-34, 35-39, 40-44,
-                45-49, 50-54, 55-59.
- 5. inv-nodes: 0-2, 3-5, 6-8, 9-11, 12-14, 15-17, 18-20, 21-23, 24-26,
-               27-29, 30-32, 33-35, 36-39.
- 6. node-caps: yes, no.
- 7. deg-malig: 1, 2, 3.
- 8. breast: left, right.
- 9. breast-quad: left-up, left-low, right-up,	right-low, central.
-10. irradiat:	yes, no.
-
 # Load data
-```{r}
 data <- read.table('data/breast-cancer.data', sep = ',', header = F,
                    col.names = c('Class', 'age', 'menopause', 'tumor-size',
                                  'inv-nodes', 'node-caps', 'deg-malig', 'breast',
@@ -56,20 +25,10 @@ data$tumor.size.end <- as.numeric(data$tumor.size.end)
 
 data$inv.nodes.begin <- as.numeric(data$inv.nodes.begin)
 data$inv.nodes.end <- as.numeric(data$inv.nodes.end)
-```
 
-Head
-```{r}
 head(data)
-```
-
-Summary
-```{r}
 summary(data)
-```
-# Make test and train sets
-
-```{r}
+# Train and test sets
 sizeOfClass <- round(nrow(filter(data, Class == 'recurrence.events')) * 0.7)
 
 inTraining <- 1:sizeOfClass
@@ -82,11 +41,23 @@ noRecTest <- filter(data, Class == 'no.recurrence.events')[-inTraining,]
 
 training <- rbind(recTrain, noRecTrain)
 testing <- rbind(recTest, noRecTest)
-```
 
-# Classification
+# set.seed(23)
+#inTraining <- 
+#   createDataPartition(
+# attribute stratification
+#    y = data$Class,
+# seperating class labels
+#    p = .75,
+# using hold out scheme
+#    list = FALSE)
+#training <- data[ inTraining,]
+#testing  <- data[-inTraining,]
+#training = upsample(training, cat_col="Class")
 
-```{r}
+summary(training$Class)
+summary(testing$Class)
+# Classify
 ctrl <- trainControl(method = "repeatedcv",
                      number = 5,
                      repeats = 5,
@@ -108,4 +79,3 @@ fitTune <- train(Class ~ .,
 fitTune
 rfClasses2 <- predict(fitTune, newdata = testing)
 confusionMatrix(data = rfClasses2, testing$Class)
-```
