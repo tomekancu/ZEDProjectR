@@ -1,6 +1,6 @@
 ---
 title: "Projekt R"
-author: "Tomasz Ancukiewicz 127219, Mikołaj Leśny XXXXXX"
+author: "Tomasz Ancukiewicz 127219, Mikołaj Leśny 127218"
 date: "18.11.2019"
 output: html_document
 ---
@@ -15,6 +15,8 @@ library(dplyr)
 library(tidyr)
 library(mlbench)
 library(caret)
+library(pROC)
+library(ggplot2)
 ```
 
 # Data
@@ -58,6 +60,8 @@ data$inv.nodes.begin <- as.numeric(data$inv.nodes.begin)
 data$inv.nodes.end <- as.numeric(data$inv.nodes.end)
 ```
 
+# Visualisation of data
+
 Head
 ```{r}
 head(data)
@@ -67,6 +71,25 @@ Summary
 ```{r}
 summary(data)
 ```
+Plots
+```{r}
+par(mfrow = c(3, 5), mar = c(4, 4, 2, 1))
+barplot(table(data$Class))
+hist(data$age.begin, breaks=5)
+hist(data$age.end, breaks=5)
+barplot(table(data$menopause))
+hist(data$tumor.size.begin)
+hist(data$tumor.size.end)
+hist(data$inv.nodes.begin)
+hist(data$inv.nodes.end)
+barplot(table(data$node.caps))
+hist(data$deg.malig, breaks=3)
+barplot(table(data$breast))
+barplot(table(data$breast.quad))
+barplot(table(data$irradiat))
+```
+
+
 # Make test and train sets
 
 ```{r}
@@ -89,23 +112,26 @@ testing <- rbind(recTest, noRecTest)
 ```{r}
 ctrl <- trainControl(method = "repeatedcv",
                      number = 5,
-                     repeats = 5,
-                     summaryFunction = twoClassSummary,
-                     classProbs = TRUE,
-                     search = 'random',
-                     allowParallel = TRUE)
+                     repeats = 5)
 
-rfGrid <- expand.grid(mtry = 1:5, ntree = c(10, 100, 1000))
+rfGrid <- expand.grid(mtry = 1:10, ntree = c(10, 100, 1000))
 
 set.seed(23)
 fitTune <- train(Class ~ .,
                  data = training,
                  method = "rf",
-                 metric = "Recall",
+                 metric = "Accurancy",
                  preProc = c("center", "scale"),
                  trControl = ctrl,
                  ntree = 1000)
 fitTune
-rfClasses2 <- predict(fitTune, newdata = testing)
-confusionMatrix(data = rfClasses2, testing$Class)
+rfClasses <- predict(fitTune, newdata = testing)
+confusionMatrix(data = rfClasses, testing$Class)
+```
+
+ROC
+```{r}
+rfClasses <- predict(fitTune, newdata=testing, type="prob")
+rfRoc <- roc(testing$Class, rfClasses$recurrence.events, levels=rev(levels(testing$Class)))
+pROC::ggroc(rfRoc)
 ```

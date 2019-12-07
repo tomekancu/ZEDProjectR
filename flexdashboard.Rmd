@@ -1,52 +1,159 @@
 ---
-title: "Untitled"
+title: "Projekt R"
+author: "Tomasz Ancukiewicz 127219, Mikołaj Leśny 127218"
+date: "18.11.2019"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
+    orientation: rows
     vertical_layout: fill
 ---
-
-
-```{r setup, include=FALSE}
+```{r libs}
 library(flexdashboard)
-library(randomForest)
-require(caTools)
-data = read.table('data/breast-cancer.data', sep=',', header = F, col.names = c('Class', 'age', 'menopause', 'tumor-size', 'inv-nodes', 'node-caps', 'deg-malig', 'breast', 'breast-quad' ,'irradiat'))
-sample = sample.split(data$Class   , SplitRatio = .75)
-train = subset(data, sample == TRUE)
-test  = subset(data, sample == FALSE)
-rf <- randomForest(
-  Class ~ .,
-  data=train
-)
-pred = predict(rf, newdata=test[-1])
-cm = table(test[,1], pred)
-fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, main = "Confusion Matrix")
+library(dplyr)
+library(tidyr)
+library(mlbench)
+library(caret)
+library(pROC)
+library(ggplot2)
 ```
 
-Column {data-width=650}
+```{r data}
+data <- read.table('data/breast-cancer.data', sep = ',', header = F,
+                   col.names = c('Class', 'age', 'menopause', 'tumor-size',
+                                 'inv-nodes', 'node-caps', 'deg-malig', 'breast',
+                                 'breast-quad', 'irradiat'))
+data <- as.data.frame(data) %>%
+  separate(age, into = paste("age", c('begin', 'end'), sep = ".")) %>%
+  separate(tumor.size, into = paste("tumor.size", c('begin', 'end'), sep = ".")) %>%
+  separate(inv.nodes, into = paste("inv.nodes", c('begin', 'end'), sep = "."))
+
+levels(data$Class) <- c("no.recurrence.events", "recurrence.events")
+levels(data$node.caps) <- c("any", "no", "yes")
+levels(data$breast.quad) <- c("any", "central", "left.low", "left.up", "right.low", "right.up")
+
+data$age.begin <- as.numeric(data$age.begin)
+data$age.end <- as.numeric(data$age.end)
+
+data$tumor.size.begin <- as.numeric(data$tumor.size.begin)
+data$tumor.size.end <- as.numeric(data$tumor.size.end)
+
+data$inv.nodes.begin <- as.numeric(data$inv.nodes.begin)
+data$inv.nodes.end <- as.numeric(data$inv.nodes.end)
+```
+```{r sets}
+sizeOfClass <- round(nrow(filter(data, Class == 'recurrence.events')) * 0.7)
+
+inTraining <- 1:sizeOfClass
+
+recTrain <- filter(data, Class == 'recurrence.events')[inTraining,]
+recTest <- filter(data, Class == 'recurrence.events')[-inTraining,]
+
+noRecTrain <- filter(data, Class == 'no.recurrence.events')[inTraining,]
+noRecTest <- filter(data, Class == 'no.recurrence.events')[-inTraining,]
+
+training <- rbind(recTrain, noRecTrain)
+testing <- rbind(recTest, noRecTest)
+```
+```{r train}
+ctrl <- trainControl(method = "repeatedcv",
+                     number = 5,
+                     repeats = 5)
+
+rfGrid <- expand.grid(mtry = 1:10, ntree = c(10, 100, 1000))
+
+set.seed(23)
+fitTune <- train(Class ~ .,
+                 data = training,
+                 method = "rf",
+                 metric = "Accurancy",
+                 preProc = c("center", "scale"),
+                 trControl = ctrl,
+                 ntree = 1000)
+rfClasses <- predict(fitTune, newdata = testing)
+cm <- confusionMatrix(data = rfClasses, testing$Class)
+
+rfClasses <- predict(fitTune, newdata=testing, type="prob")
+rfRoc <- roc(testing$Class, rfClasses$recurrence.events, levels=rev(levels(testing$Class)))
+```
+Row {.tabset}
+-----------------------------------------------------------------------
+
+### Class
+```{r}
+barplot(table(data$Class))
+```
+
+### Age begin
+```{r}
+hist(data$age.begin, breaks=5)
+```
+
+### Age end
+```{r}
+hist(data$age.end, breaks=5)
+```
+
+### Menopause
+```{r}
+barplot(table(data$menopause))
+```
+
+### Tumor size begin
+```{r}
+hist(data$tumor.size.begin)
+```
+
+### Tumor size end
+```{r}
+hist(data$tumor.size.end)
+```
+
+### Inv nodes begin
+```{r}
+hist(data$inv.nodes.begin)
+```
+
+### Inv nodes end
+```{r}
+hist(data$inv.nodes.end)
+```
+
+### Node caps
+```{r}
+barplot(table(data$node.caps))
+```
+
+### deg malig
+```{r}
+hist(data$deg.malig, breaks=3)
+```
+
+### Breast
+```{r}
+barplot(table(data$breast))
+```
+
+### Breast quad
+```{r}
+barplot(table(data$breast.quad))
+```
+
+### irradiant
+```{r}
+barplot(table(data$irradiat))
+```
+
+Row {.tabset}
 -----------------------------------------------------------------------
 
 ### Confusion Matrix
 
 ```{r}
-fourfoldplot(cm, color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, main = "Confusion Matrix")
+fourfoldplot(cm$table, color = c("#CC6666", "#99CC99"), margin = 1)
 ```
 
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Age distribution
+### ROC
 
 ```{r}
-barplot(prop.table(table(data$age)))
+pROC::ggroc(rfRoc)
 ```
-
-### Degree of malignancy distribution
-
-```{r}
-barplot(prop.table(table(data$deg.malig)))
-```
-

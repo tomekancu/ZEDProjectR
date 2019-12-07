@@ -60,22 +60,18 @@ summary(testing$Class)
 # Classify
 ctrl <- trainControl(method = "repeatedcv",
                      number = 5,
-                     repeats = 5,
-                     summaryFunction = twoClassSummary,
-                     classProbs = TRUE,
-                     search = 'random',
-                     allowParallel = TRUE)
+                     repeats = 5)
 
-rfGrid <- expand.grid(mtry = 1:5, ntree = c(10, 100, 1000))
+rfGrid <- expand.grid(mtry = 1:10, ntree = c(10, 100, 1000))
 
 set.seed(23)
 fitTune <- train(Class ~ .,
                  data = training,
                  method = "rf",
-                 metric = "Recall",
+                 metric = "Accurancy",
                  preProc = c("center", "scale"),
                  trControl = ctrl,
                  ntree = 1000)
 fitTune
-rfClasses2 <- predict(fitTune, newdata = testing)
-confusionMatrix(data = rfClasses2, testing$Class)
+rfClasses <- predict(fitTune, newdata = testing)
+confusionMatrix(data = rfClasses, testing$Class)
